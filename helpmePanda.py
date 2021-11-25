@@ -72,9 +72,13 @@ class helpmePanda:
       for line in iter(process.stdout.readline,''):
         if 'size' in line:
           size=re.findall("\d+\.\d+", line)
-          tmp_size += float(size[0])
-          print("datasetname: {}; size: {} GB\n".format(cont, size))
-    print tmp_size 
+          if 'GB' in line:
+            tmp_size += float(size[0])
+          if 'MB' in line:
+            tmp_size += float(size[0])/1000
+
+          print("datasetname: {}; {}\n".format(cont, line))
+    print ("=== total size of done state samples: {} GB".format(tmp_size))
     
 
 
