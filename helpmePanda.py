@@ -1,7 +1,9 @@
 ### Help to deal with panda job
 
 from pandaclient import panda_api
-c = panda_api.get_api()
+import argparse
+import subprocess
+import re
 
 class helpmePanda:
   def __init__(self, tasks):
@@ -14,7 +16,6 @@ class helpmePanda:
     self.broken_taskIDs=[]
     self.running_taskIDs=[]
     for task in self.tasks:
-        #print ('taskID={} status={} containername={}'.format(task['jeditaskid'], task['status'], task['datasets']))
         taskID=task['jeditaskid']
         status=task['status']
         if 'done' in status:
@@ -50,22 +51,42 @@ class helpmePanda:
           else:
               print ("Not good with {} : {}".format(server_return_code, dialog_message))
 
-  # print containername of the done and running jobs
-  def get_output_container(self):
+  # return list with containername of the done  jobs
+  def get_output_container(self, output_filename):
     tmp_list = []
     for task in self.tasks:
       if 'done' in task['status']: 
-        tmp_list.append((task['datasets'][1])['containername'])
+        tmp_list.append(task['taskname'][:-1]+"_"+output_filename+"_root") # cut the last "/" from the container name and add output name
     return tmp_list
 
+  # total size of the done containers
+  def get_sizeof_done_containers(self, containername_list):
+    tmp_size=0
+    print("=== You need to setup rucio first if you haven't done so; setupATLAS and lsetup rucio ===\n")
+    print("=== Finding size takes time ")
+    #process.stdin.write('setupATLAS; lsetup rucio\n')
+    for cont in containername_list:
+      process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      process.stdin.write('rucio list-files '+cont+'\n')
+      process.stdin.close()
+      for line in iter(process.stdout.readline,''):
+        if 'size' in line:
+          size=re.findall("\d+\.\d+", line)
+          tmp_size += float(size[0])
+          print("datasetname: {}; size: {} GB\n".format(cont, size))
+    print tmp_size 
     
 
+
 if __name__=="__main__":
+  parser = argparse.ArgumentParser(description='This program helps to deal with panda jobs')
+  parser.add_argument('--output_filename', type=str, required=True, help="provide the name of the output root file you mentioned in the panda job (name without .root)")
+  args = parser.parse_args()
+
+  c = panda_api.get_api()
   tasks = c.get_tasks()
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
-  print(len(helpmePandaObj.get_output_container()))
-  for container in  helpmePandaObj.get_output_container():
-    print(container)
-    print("\n")
-
+  container_list = helpmePandaObj.get_output_container(args.output_filename)
+  print(container_list)
+  helpmePandaObj.get_sizeof_done_containers(container_list)
