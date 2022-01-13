@@ -14,7 +14,9 @@ class helpmePanda:
     self.done_taskIDs=[]
     self.failed_taskIDs=[]
     self.broken_taskIDs=[]
+    self.broken_datasets=[]
     self.running_taskIDs=[]
+    self.finished_taskIDs=[]
     for task in self.tasks:
         taskID=task['jeditaskid']
         status=task['status']
@@ -24,9 +26,18 @@ class helpmePanda:
           self.failed_taskIDs.append(taskID)
         elif 'broken' in status:
           self.broken_taskIDs.append(taskID)
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          self.broken_datasets.append(container_name)
         elif 'running' in status:
           self.running_taskIDs.append(taskID)
+        elif 'finished' in status:
+          self.finished_taskIDs.append(taskID)
 
+  # get list with datasets name corresponding to broken jobs
+  def get_broken_datasets(self):
+    return self.broken_datasets
 
   # print how many jobs are in done/failed/broken/running state
   def print_overall_status(self):
@@ -34,6 +45,8 @@ class helpmePanda:
     print(self.done_taskIDs)
     print("\n==== Running tasks. total number:{} ===\n".format(len(self.running_taskIDs) ) )
     print(self.running_taskIDs)
+    print("\n==== Finished tasks. total number:{} ===\n".format(len(self.finished_taskIDs) ) )
+    print(self.finished_taskIDs)
     print("\n==== failed tasks. total number:{} ===\n".format(len(self.failed_taskIDs)) )
     print(self.failed_taskIDs)
     print("\n==== broken tasks. total number:{} ===\n".format(len(self.broken_taskIDs)) )
@@ -41,7 +54,8 @@ class helpmePanda:
 
   # retry failed tasks
   def retry_failed_jobs(self, task):
-    for failed_task in failed_taskIDs:
+    sum_list_failed_finished = self.failed_taskIDs + self.finished_taskIDs
+    for failed_task in sum_list_failed_finished:
       print(">>>> going to retry task {} <<<<<<<".format(failed_task))
       communication_status, o = c.retry_task(failed_task)
       if communication_status:
@@ -55,7 +69,7 @@ class helpmePanda:
   def get_output_container(self, output_filename):
     tmp_list = []
     for task in self.tasks:
-      if 'done' in task['status']: 
+      if 'done' or 'running' in task['status']: 
         tmp_list.append(task['taskname'][:-1]+"_"+output_filename+"_root") # cut the last "/" from the container name and add output name
     return tmp_list
 
@@ -91,6 +105,11 @@ if __name__=="__main__":
   tasks = c.get_tasks()
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
-  container_list = helpmePandaObj.get_output_container(args.output_filename)
-  print(container_list)
-  helpmePandaObj.get_sizeof_done_containers(container_list)
+  helpmePandaObj.retry_failed_jobs(tasks)
+  #print broken datasets
+  list = helpmePandaObj.get_broken_datasets()
+  print (list)
+  
+  #container_list = helpmePandaObj.get_output_container(args.output_filename)
+  #print(container_list)
+  #helpmePandaObj.get_sizeof_done_containers(container_list)

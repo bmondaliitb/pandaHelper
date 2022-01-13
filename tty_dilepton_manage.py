@@ -43,6 +43,23 @@ def download_files_from_grid(container_list, dictionary, output_path):
       for line in iter(process.stdout.readline,''):
         print(line)
     
+
+def make_bash_script_to_download_files_from_grid(container_list, dictionary, output_path, bash_script):
+  file = open(bash_script, "w")
+  for container in container_list:
+    if debug: print(container)
+    cont_split = container.split('.')
+    cont_dsid = int(cont_split[2])
+    cont_tags = ((cont_split[len(cont_split) -3]).split('_'))
+    cont_atag = cont_tags[1]
+    if debug:print("{}   {} ".format(cont_dsid, str(cont_atag[0]) ))
+    folder_name = dictionary[cont_dsid, str(cont_atag[0]) ]
+    if debug: print(" Folder name: {} ".format(folder_name))
+    # use subprocess to download 
+    file.write('cd {}; mkdir -p {}; pushd {}; \n'.format(output_path, folder_name, folder_name))
+    file.write('rucio download '+container+'\n')
+
+  file.close()
      
 
 if __name__=="__main__":
@@ -59,4 +76,5 @@ if __name__=="__main__":
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
   container_list = helpmePandaObj.get_output_container(output_filename)
-  download_files_from_grid(container_list, dictionary, output_path)
+  #download_files_from_grid(container_list, dictionary, output_path)
+  make_bash_script_to_download_files_from_grid(container_list, dictionary, output_path, "download_tty_dilep.sh")
