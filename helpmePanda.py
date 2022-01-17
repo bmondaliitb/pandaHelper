@@ -100,13 +100,14 @@ class helpmePanda:
       key = ""
       if camp=="mc16a":
         key=get_key(mc16a.samples, brokends)
-        file_mc16a.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16a.write("\nsamples[\"{}\"].append(\'{}\')\n".format(key, brokends) ) 
+        #file_mc16a.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
       if camp=="mc16d":
         key=get_key(mc16d.samples, brokends)
-        file_mc16d.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16d.write("\nsamples[\"{}\"].append(\'{}\')\n".format(key, brokends) ) 
       if camp=="mc16e":
         key=get_key(mc16e.samples, brokends)
-        file_mc16e.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16e.write("\nsamples[\"{}\"].append(\'{}\')\n".format(key, brokends) ) 
 
     file_mc16a.write("\nfor entry in samples:\n")
     file_mc16a.write("  TopExamples.grid.Add(entry).datasets = [ds for ds in samples[entry]]\n")
