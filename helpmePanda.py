@@ -71,15 +71,28 @@ class helpmePanda:
     file_mc16a = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16a_TOPQ1.py", 'w')
     file_mc16d = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16d_TOPQ1.py", 'w')
     file_mc16e = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16e_TOPQ1.py", 'w')
+    empty_file_mc16a = open("/afs/cern.ch/work/b/bmondal/PandaAPI/dicts/empty_MC16a_TOPQ1.py", 'r')
+    empty_file_mc16d = open("/afs/cern.ch/work/b/bmondal/PandaAPI/dicts/empty_MC16d_TOPQ1.py", 'r')
+    empty_file_mc16e = open("/afs/cern.ch/work/b/bmondal/PandaAPI/dicts/empty_MC16e_TOPQ1.py", 'r')
+
     # write mc16a files
     file_mc16a.write("import TopExamples.grid\n")
     file_mc16a.write("\nsamples = dict()\n")
+    for line in empty_file_mc16a.readlines():
+      file_mc16a.write(line)
+
     # write mc16d files
     file_mc16d.write("import TopExamples.grid\n")
     file_mc16d.write("\nsamples = dict()\n")
+    for line in empty_file_mc16d.readlines():
+      file_mc16d.write(line)
+
     # write mc16e files
     file_mc16e.write("import TopExamples.grid\n")
     file_mc16e.write("\nsamples = dict()\n")
+    for line in empty_file_mc16e.readlines():
+      file_mc16e.write(line)
+
     # list out keys and values separately in samples dict
     for brokends in self.broken_datasets:
       # which campaign it is
@@ -87,13 +100,13 @@ class helpmePanda:
       key = ""
       if camp=="mc16a":
         key=get_key(mc16a.samples, brokends)
-        file_mc16a.write("samples[\"mc16a_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16a.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
       if camp=="mc16d":
         key=get_key(mc16d.samples, brokends)
-        file_mc16d.write("samples[\"mc16d_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16d.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
       if camp=="mc16e":
         key=get_key(mc16e.samples, brokends)
-        file_mc16e.write("samples[\"mc16e_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+        file_mc16e.write("\nsamples[\"{}\"] = [\'{}\',]\n".format(key, brokends) ) 
 
     file_mc16a.write("\nfor entry in samples:\n")
     file_mc16a.write("  TopExamples.grid.Add(entry).datasets = [ds for ds in samples[entry]]\n")
