@@ -1,2 +1,7 @@
 test_path/*
 *.pyc
+log/*
+broken_samples/*
+download_tty_dilep.sh
+*.swp
+*.swx

@@ -16,7 +16,7 @@ def get_dict_dsid_atag_foldername():
     for sample in samples[entry]:
       split_list = sample.split(".") # split the whole string with '.'
       sample_dsid = split_list[1] # dsid
-      sample_tags = split_list[5] # take only e,a,r,p tag
+      sample_tags = split_list[len(split_list) -1] # take only e,a,r,p tag
       a_tag = (sample_tags.split("_"))[1] # this only returns AFII/FS 
       #print("{}  {} {} \n".format(sample_dsid, a_tag[0], entry))
       dict_dsid_atag_foldername[(int(sample_dsid), str(a_tag[0]) )] = entry
@@ -64,7 +64,7 @@ def make_bash_script_to_download_files_from_grid(container_list, dictionary, out
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser(description='This program helps to deal with panda jobs')
-  parser.add_argument('--job_output_filename', type=str, required=True, help="provide the name of the output root file you mentioned in the panda job (name without .root)")
+  parser.add_argument('--job_output_filename', type=str, required=True, help="provide the name of the output root file you mentioned in the panda job (name without .root). example output_ttgamma")
   parser.add_argument('--output_path', type=str, required=True, help="ABSOLUTE path where you want to download the files; please use absolute path; folder structure will automatically be created")
   args = parser.parse_args()
 
@@ -72,7 +72,7 @@ if __name__=="__main__":
   output_path = args.output_path#'/afs/cern.ch/work/b/bmondal/PandaAPI/test_path'
   dictionary = get_dict_dsid_atag_foldername()
   c = panda_api.get_api()
-  tasks = c.get_tasks()
+  tasks = c.get_tasks(days=20)
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
   container_list = helpmePandaObj.get_output_container(output_filename)

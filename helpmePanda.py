@@ -4,6 +4,33 @@ from pandaclient import panda_api
 import argparse
 import subprocess
 import re
+from tty_samples_dict import *
+import sys
+sys.path.append("/afs/cern.ch/work/b/bmondal/PandaAPI/dicts")
+import  MC16a_TOPQ1 as mc16a
+import  MC16d_TOPQ1 as mc16d
+import  MC16e_TOPQ1 as mc16e
+
+# get key corresponding to value in the sample dictionary
+def get_key(dictionary, val):
+  for key, values in dictionary.items():
+    for value in values:
+      if val == value:
+        return key
+
+# get campaign from container name
+def get_campaign(val):
+  split_list = val.split(".") # split the whole string with '.'
+  sample_dsid = split_list[1] # dsid
+  sample_tags = split_list[len(split_list) -1] # take only e,a,r,p tag
+  r_tag = (sample_tags.split("_"))[2] # this only returns AFII/FS 
+  if r_tag == "r9364" :
+    return "mc16a"
+  if r_tag == "r10201" :
+    return "mc16d"
+  if r_tag == "r10724" :
+    return "mc16e"
+ 
 
 class helpmePanda:
   def __init__(self, tasks):
@@ -39,6 +66,47 @@ class helpmePanda:
   def get_broken_datasets(self):
     return self.broken_datasets
 
+  # create MC16a.py file for broken jobs to resubmit those again
+  def create_sample_file_with_broken_jobs(self):
+    file_mc16a = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16a_TOPQ1.py", 'w')
+    file_mc16d = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16d_TOPQ1.py", 'w')
+    file_mc16e = open("/afs/cern.ch/work/b/bmondal/PandaAPI/broken_samples/MC16e_TOPQ1.py", 'w')
+    # write mc16a files
+    file_mc16a.write("import TopExamples.grid\n")
+    file_mc16a.write("\nsamples = dict()\n")
+    # write mc16d files
+    file_mc16d.write("import TopExamples.grid\n")
+    file_mc16d.write("\nsamples = dict()\n")
+    # write mc16e files
+    file_mc16e.write("import TopExamples.grid\n")
+    file_mc16e.write("\nsamples = dict()\n")
+    # list out keys and values separately in samples dict
+    for brokends in self.broken_datasets:
+      # which campaign it is
+      camp = get_campaign(brokends)
+      key = ""
+      if camp=="mc16a":
+        key=get_key(mc16a.samples, brokends)
+        file_mc16a.write("samples[\"mc16a_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+      if camp=="mc16d":
+        key=get_key(mc16d.samples, brokends)
+        file_mc16d.write("samples[\"mc16d_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+      if camp=="mc16e":
+        key=get_key(mc16e.samples, brokends)
+        file_mc16e.write("samples[\"mc16e_{}\"] = [\'{}\',]\n".format(key, brokends) ) 
+
+    file_mc16a.write("\nfor entry in samples:\n")
+    file_mc16a.write("  TopExamples.grid.Add(entry).datasets = [ds for ds in samples[entry]]\n")
+    file_mc16d.write("\nfor entry in samples:\n")
+    file_mc16d.write("  TopExamples.grid.Add(entry).datasets = [ds for ds in samples[entry]]\n")
+    file_mc16e.write("\nfor entry in samples:\n")
+    file_mc16e.write("  TopExamples.grid.Add(entry).datasets = [ds for ds in samples[entry]]\n")
+
+    file_mc16a.close()
+    file_mc16d.close()
+    file_mc16e.close()
+
+
   # print how many jobs are in done/failed/broken/running state
   def print_overall_status(self):
     print("==== Done tasks. total number:{} ===\n".format(len(self.done_taskIDs) ) )
@@ -69,7 +137,7 @@ class helpmePanda:
   def get_output_container(self, output_filename):
     tmp_list = []
     for task in self.tasks:
-      if 'done' or 'running' in task['status']: 
+      if 'done' or 'finished' or 'running' in task['status']: 
         tmp_list.append(task['taskname'][:-1]+"_"+output_filename+"_root") # cut the last "/" from the container name and add output name
     return tmp_list
 
@@ -93,6 +161,7 @@ class helpmePanda:
 
           print("datasetname: {}; {}\n".format(cont, line))
     print ("=== total size of done state samples: {} GB".format(tmp_size))
+    if(tmp_size == 0): print ("=== CHECK THAT YOU HAVE SET UP RUCIO. do 'setupATLAS; lsetup rucio' ====")
     
 
 
@@ -102,13 +171,14 @@ if __name__=="__main__":
   args = parser.parse_args()
 
   c = panda_api.get_api()
-  tasks = c.get_tasks()
+  tasks = c.get_tasks(days=20)
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
   helpmePandaObj.retry_failed_jobs(tasks)
   #print broken datasets
   list = helpmePandaObj.get_broken_datasets()
-  print (list)
+  #print (list)
+  helpmePandaObj.create_sample_file_with_broken_jobs()
   
   #container_list = helpmePandaObj.get_output_container(args.output_filename)
   #print(container_list)
