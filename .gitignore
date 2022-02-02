@@ -8,3 +8,4 @@ download_tty_dilep.sh
 *.log
 *.backup
 *.txt
+*download*.sh
