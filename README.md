@@ -12,3 +12,4 @@ This will create `broken_samples/MC16a_TOPQ1.py, broken_samples/MC16d_TOPQ1.py, 
 copy this files to the `ttgamma-ntuple-production/TTGammaEventSaver/python/` folder
 
 then run tty-grid-submit.py the way you use `tty-grid-submit.py -typ reco -camp a -ch dilep_CR -submit -trial 0`
+

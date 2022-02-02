@@ -39,18 +39,30 @@ class helpmePanda:
     status = ''
     containername=''
     self.done_taskIDs=[]
+    self.done_datasets=[]
     self.failed_taskIDs=[]
+    self.failed_datasets=[]
     self.broken_taskIDs=[]
     self.broken_datasets=[]
     self.running_taskIDs=[]
+    self.running_datasets=[]
     self.finished_taskIDs=[]
+    self.finished_datasets=[]
     for task in self.tasks:
         taskID=task['jeditaskid']
         status=task['status']
         if 'done' in status:
           self.done_taskIDs.append(taskID)
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          self.done_datasets.append(container_name)
         elif 'failed' in status:
           self.failed_taskIDs.append(taskID)
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          self.failed_datasets.append(container_name)
         elif 'broken' in status:
           self.broken_taskIDs.append(taskID)
           tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
@@ -59,12 +71,111 @@ class helpmePanda:
           self.broken_datasets.append(container_name)
         elif 'running' in status:
           self.running_taskIDs.append(taskID)
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          self.running_datasets.append(container_name)
         elif 'finished' in status:
           self.finished_taskIDs.append(taskID)
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          self.finished_datasets.append(container_name)
 
   # get list with datasets name corresponding to broken jobs
   def get_broken_datasets(self):
     return self.broken_datasets
+
+  # print dsid and corresponding finish percentage
+  def get_dsid_done_percentage(self, filename):
+     file_a = open('{}_a.txt'.format(filename), 'w')
+     file_d = open('{}_d.txt'.format(filename), 'w')
+     file_e = open('{}_e.txt'.format(filename), 'w')
+     file_a.write("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> starting printing finished datasets and finished percentage >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n")
+     file_a.write("----------------------------------------------------------------------------------------------------------------------------------------------------- \n")
+     file_a.write("                                                                                                                    DSID              nfinished/nfiles\n")
+     file_d.write("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> starting printing finished datasets and finished percentage >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n")
+     file_d.write("----------------------------------------------------------------------------------------------------------------------------------------------------- \n")
+     file_d.write("                                                                                                                    DSID              nfinished/nfiles\n")
+     file_e.write("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> starting printing finished datasets and finished percentage >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n")
+     file_e.write("----------------------------------------------------------------------------------------------------------------------------------------------------- \n")
+     file_e.write("                                                                                                                    DSID              nfinished/nfiles\n")
+     for task in self.tasks:
+        taskID=task['jeditaskid']
+        status=task['status']
+        if 'done' in status:
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          nfiles = task['nfiles']
+          nfilesfinished = task['nfilesfinished']
+          done_percentage = float(nfilesfinished/nfiles)*100
+          camp = get_campaign(container_name)
+          if(camp == 'mc16a'):
+            file_a.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16d'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16e'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+        if 'finished' in status:
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          nfiles = task['nfiles']
+          nfilesfinished = task['nfilesfinished']
+          done_percentage = float(nfilesfinished/nfiles)*100
+          camp = get_campaign(container_name)
+          if(camp == 'mc16a'):
+            file_a.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16d'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16e'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+        if 'running' in status:
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          nfiles = task['nfiles']
+          nfilesfinished = task['nfilesfinished']
+          done_percentage = float(nfilesfinished/nfiles)*100
+          camp = get_campaign(container_name)
+          if(camp == 'mc16a'):
+            file_a.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16d'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16e'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+        if 'broken' in status:
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          nfiles = task['nfiles']
+          nfilesfinished = task['nfilesfinished']
+          done_percentage = float(nfilesfinished/nfiles)*100
+          camp = get_campaign(container_name)
+          if(camp == 'mc16a'):
+            file_a.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16d'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16e'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+        if 'failed' in status:
+          tmp_list = task['datasets'] # get the internal list corresponding to 'datasets'
+          tmp_list_first_element = tmp_list[0]
+          container_name = tmp_list_first_element['containername']
+          nfiles = task['nfiles']
+          nfilesfinished = task['nfilesfinished']
+          done_percentage = float(nfilesfinished/nfiles)*100
+          camp = get_campaign(container_name)
+          if(camp == 'mc16a'):
+            file_a.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16d'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+          if(camp == 'mc16e'):
+            file_d.write("{0: >130}    {1}%\n".format(container_name, done_percentage) )
+     file_a.close()
+     file_d.close()
+     file_e.close()
 
   # create MC16a.py file for broken jobs to resubmit those again
   def create_sample_file_with_broken_jobs(self):
@@ -185,15 +296,16 @@ if __name__=="__main__":
   args = parser.parse_args()
 
   c = panda_api.get_api()
-  tasks = c.get_tasks(days=20)
+  tasks = c.get_tasks(days=14)
   helpmePandaObj = helpmePanda(tasks)
   helpmePandaObj.print_overall_status()
   helpmePandaObj.retry_failed_jobs(tasks)
   #print broken datasets
   list = helpmePandaObj.get_broken_datasets()
-  #print (list)
-  helpmePandaObj.create_sample_file_with_broken_jobs()
+  print (list)
+  #helpmePandaObj.create_sample_file_with_broken_jobs()
   
   #container_list = helpmePandaObj.get_output_container(args.output_filename)
   #print(container_list)
   #helpmePandaObj.get_sizeof_done_containers(container_list)
+  helpmePandaObj.get_dsid_done_percentage('log') # write job dsid and done percentage in files

@@ -46,9 +46,8 @@ def download_files_from_grid(container_list, dictionary, output_path):
 
 def make_bash_script_to_download_files_from_grid(container_list, dictionary, output_path, bash_script):
   file = open(bash_script, "w")
-  search_list = ['dilep_CR_2', 'dilep_CR_0']
   for container in container_list:
-    if any(x in container for x in search_list):
+    if 'ljets_2' in container:
       if debug: print(container)
       cont_split = container.split('.')
       cont_dsid = int(cont_split[2])
@@ -79,4 +78,4 @@ if __name__=="__main__":
   helpmePandaObj.print_overall_status()
   container_list = helpmePandaObj.get_output_container(output_filename)
   #download_files_from_grid(container_list, dictionary, output_path)
-  make_bash_script_to_download_files_from_grid(container_list, dictionary, output_path, "download_tty_dilep.sh")
+  make_bash_script_to_download_files_from_grid(container_list, dictionary, output_path, "download_tty_ljet.sh")
